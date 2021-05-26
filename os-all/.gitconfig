@@ -1,0 +1,13 @@
+[user]
+	email = caleb@calebwherry.com
+	name = J. Caleb Wherry
+[color]
+	branch = auto
+	diff = auto
+	status = auto
+	ui = true
+[status]
+	untracked-files = true
+	branch = true
+[core]
+	editor = vim
