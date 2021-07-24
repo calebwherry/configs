@@ -1,21 +1,6 @@
-﻿function Get-AzSwiftTeam
+function Get-Team
 {
-    return Get-MsGraphTeamUnder -emailId chanravi@microsoft.com -includeLeader;
-}
-
-function Get-AzBlazeTeam
-{
-    return Get-MsGraphTeamUnder -emailId mamadoukane@microsoft.com -includeLeader;
-}
-
-function Get-AzBlitzPPSTeam
-{
-    return Get-MsGraphTeamUnder -emailId daudhow@ntdev.microsoft.com -includeLeader;
-}
-
-function Get-CrpCoreTeam
-{
-    return Get-MsGraphTeamUnder -emailId smotwani@microsoft.com -includeLeader;
+    return Get-MsGraphTeamUnder -emailId email@microsoft.com -includeLeader;
 }
 
 function Get-TeamActivePRReportTable
@@ -284,7 +269,6 @@ function Get-FeatureStatusReportTable
     $token = Get-AccessToken
     $tableRows = @()
     $features = az boards query --id $queryId --organization https://msazure.visualstudio.com/ --project One | ConvertFrom-Json
-    # 18605e01-0427-4f60-829c-29f5a71a7865
 
     foreach($feature in $features)
     {
@@ -369,21 +353,11 @@ function Get-TableStyle
     </style>";
 }
 
-function Get-AzSwiftEmailIntro
+function Get-TeamEmailIntro
 {
     return '
     <div>
-        <p>Status report for AzSwift team - for detailed drill down look at <a href="https://msazure.visualstudio.com/One/_backlogs/backlog/AzSwift/Epics">Epics</a>. Current sprint details <a href="https://msazure.visualstudio.com/One/_sprints/taskboard/AzSwift/One/Azure%20Compute/CPlat/Cobalt/">are here</a>.</p>
-    </div>
-    <h2>Feature status</h2>';
-}
-
-function Get-AzBlazeEmailIntro
-{
-    # TODO for AzBlaze - AzBlaze needs an area path and sprint board - until then use AzSwift. When done, update links.
-    return '
-    <div>
-        <p>Status report for AzBlaze team - for detailed drill down look at <a href="https://msazure.visualstudio.com/One/_backlogs/backlog/AzSwift/Epics">Epics</a>. Current sprint details <a href="https://msazure.visualstudio.com/One/_sprints/taskboard/AzSwift/One/Azure%20Compute/CPlat/Cobalt/">are here</a>.</p>
+        <p>Status report for Team - for detailed drill down look at <a href="<link>">Epics</a>. Current sprint details <a href="<link>">are here</a>.</p>
     </div>
     <h2>Feature status</h2>';
 }
@@ -448,57 +422,24 @@ function Get-MsGraphTeamUnder
     return $out;
 }
 
-function Send-AzSwiftDailyPRReport
+function Send-TeamDailyPRReport
 {
     $style = Get-TableStyle
-    $pr = Get-TeamActivePRHealthReportTable -emailAddresses (Get-AzSwiftTeam).Email
+    $pr = Get-TeamActivePRHealthReportTable -emailAddresses (Get-Team).Email
 
     $body = $style + "<h2>Active PRs</h2>" + $pr
 
     $from = $env:USERNAME + "@microsoft.com"
-    Send-MailMessage -From $from -To "azswift@microsoft.com" -Subject 'AzSwift - PR Daily Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
+    Send-MailMessage -From $from -To "team@microsoft.com" -Subject 'Team - PR Daily Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
 }
 
-function Send-AzBlazeDailyPRReport
+function Send-ExecutiveTeamStatus
 {
-    $style = Get-TableStyle
-    $pr = Get-TeamActivePRHealthReportTable -emailAddresses (Get-AzBlazeTeam).Email
-
-    $body = $style + "<h2>Active PRs</h2>" + $pr
-
-    $from = $env:USERNAME + "@microsoft.com"
-    Send-MailMessage -From $from -To "azblaze-atl@microsoft.com" -Subject 'AzBlaze - PR Daily Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-}
-
-function Send-AzBlitzPPSDailyPRReport
-{
-    $style = Get-TableStyle
-    $pr = Get-TeamActivePRHealthReportTable -emailAddresses (Get-AzBlitzPPSTeam).Email
-
-    $body = $style + "<h2>Active PRs</h2>" + $pr
-
-    $from = $env:USERNAME + "@microsoft.com"
-    Send-MailMessage -From $from -To "chanravi@microsoft.com","sushantr@microsoft.com" -Subject 'AzBlitz PPS - PR Daily Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-}
-
-function Send-CrpCoreDailyPRReport
-{
-    $style = Get-TableStyle
-    $pr = Get-TeamActivePRHealthReportTable -emailAddresses (Get-CrpCoreTeam).Email
-
-    $body = $style + "<h2>Active PRs</h2>" + $pr
-
-    $from = $env:USERNAME + "@microsoft.com"
-    Send-MailMessage -From $from -To "chanravi@microsoft.com","sushantr@microsoft.com" -Subject 'CRP Core - PR Daily Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-}
-
-function Send-AzSwiftExecutiveTeamStatus
-{
-    $feature = Get-FeatureStatusReportTable -queryId 18605e01-0427-4f60-829c-29f5a71a7865
-    $pr = Get-TeamActivePRReportTable -emailAddresses (Get-AzSwiftTeam).Email
-    $closedPR = Get-TeamClosedPRReportTable -emailAddresses (Get-AzSwiftTeam).Email
-    $prBoard = Get-TeamPRBoard -emailAddresses (Get-AzSwiftTeam).Email
-    $intro = Get-AzSwiftEmailIntro
+    $feature = Get-FeatureStatusReportTable -queryId <id>
+    $pr = Get-TeamActivePRReportTable -emailAddresses (Get-Team).Email
+    $closedPR = Get-TeamClosedPRReportTable -emailAddresses (Get-Team).Email
+    $prBoard = Get-TeamPRBoard -emailAddresses (Get-Team).Email
+    $intro = Get-TeamEmailIntro
 
     $style = Get-TableStyle
 
@@ -506,17 +447,16 @@ function Send-AzSwiftExecutiveTeamStatus
 
     $from = $env:USERNAME + "@microsoft.com"
 
-    Send-MailMessage -From $from -To "YunusM-EngLeads@microsoft.com" -Cc "azswift@microsoft.com","sushantr@microsoft.com" -Subject 'AzSwift Weekly Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-    # Send-MailMessage -From $from -To "chanravi@microsoft.com" -Subject 'AzSwift Weekly Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
+    Send-MailMessage -From $from -To "team@microsoft.com" -Cc "team@microsoft.com","team@microsoft.com" -Subject 'Team Weekly Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
 }
 
-function Send-AzSwiftStageExecutiveTeamStatus
+function Send-StageExecutiveTeamStatus
 {
-    $feature = Get-FeatureStatusReportTable -queryId 18605e01-0427-4f60-829c-29f5a71a7865
-    $pr = Get-TeamActivePRReportTable -emailAddresses (Get-AzSwiftTeam).Email
-    $closedPR = Get-TeamClosedPRReportTable -emailAddresses (Get-AzSwiftTeam).Email
-    $prBoard = Get-TeamPRBoard -emailAddresses (Get-AzSwiftTeam).Email
-    $intro = Get-AzSwiftEmailIntro
+    $feature = Get-FeatureStatusReportTable -queryId <od>
+    $pr = Get-TeamActivePRReportTable -emailAddresses (Get-Team).Email
+    $closedPR = Get-TeamClosedPRReportTable -emailAddresses (Get-Team).Email
+    $prBoard = Get-TeamPRBoard -emailAddresses (Get-Team).Email
+    $intro = Get-TeamEmailIntro
     
     $style = Get-TableStyle
 
@@ -524,50 +464,5 @@ function Send-AzSwiftStageExecutiveTeamStatus
 
     $from = $env:USERNAME + "@microsoft.com"
 
-    Send-MailMessage -From $from -To "azswift@microsoft.com" -Subject 'AzSwift Weekly Report (Stage) - Please update before 11:00AM' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-    #Send-MailMessage -From $from -To "chanravi@microsoft.com" -Subject 'AzSwift Weekly Report (Stage) - Please update before 11:00AM' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-}
-
-function Send-AzBlazeExecutiveTeamStatus
-{
-    $feature = Get-FeatureStatusReportTable -queryId e775d558-7a29-43e2-a5d1-5408dc8dc62f
-    $pr = Get-TeamActivePRReportTable -emailAddresses (Get-AzBlazeTeam).Email
-    $closedPR = Get-TeamClosedPRReportTable -emailAddresses (Get-AzBlazeTeam).Email
-    $prBoard = Get-TeamPRBoard -emailAddresses (Get-AzBlazeTeam).Email
-    $intro = Get-AzBlazeEmailIntro
-
-    $style = Get-TableStyle
-
-    $body = $style + $intro + $feature + "<h2>Active PRs</h2>" + $pr + "<h2>Closed PRs</h2>" + $closedPR + "<h2>PR Board</h2>" + $prBoard
-
-    $from = $env:USERNAME + "@microsoft.com"
-
-    Send-MailMessage -From $from -To "YunusM-EngLeads@microsoft.com" -Cc "azblaze-atl@microsoft.com","sushantr@microsoft.com" -Subject 'AzBlaze Weekly Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-    # Send-MailMessage -From $from -To "jowherry@microsoft.com" -Subject 'AzBlaze Weekly Report' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-}
-
-function Send-AzBlazeStageExecutiveTeamStatus
-{
-    $feature = Get-FeatureStatusReportTable -queryId e775d558-7a29-43e2-a5d1-5408dc8dc62f
-    $pr = Get-TeamActivePRReportTable -emailAddresses (Get-AzBlazeTeam).Email
-    $closedPR = Get-TeamClosedPRReportTable -emailAddresses (Get-AzBlazeTeam).Email
-    $prBoard = Get-TeamPRBoard -emailAddresses (Get-AzBlazeTeam).Email
-    $intro = Get-AzBlazeEmailIntro
-    
-    $style = Get-TableStyle
-
-    $body = $style + $intro + $feature + "<h2>Active PRs</h2>" + $pr + "<h2>Closed PRs</h2>" + $closedPR + "<h2>PR Board</h2>" + $prBoard
-
-    $from = $env:USERNAME + "@microsoft.com"
-
-    Send-MailMessage -From $from -To "azblaze-atl@microsoft.com" -Subject 'AzBlaze Weekly Report (Stage) - Please update before 11:00AM ET' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-    #Send-MailMessage -From $from -To "jowherry@microsoft.com" -Subject 'AzBlaze Weekly Report (Stage) - Please update before 11:00AM ET' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
-}
-
-function Send-SushantsTeamDailyPRReport
-{
-    Send-AzBlitzPPSDailyPRReport
-    Send-AzBlazeDailyPRReport
-    Send-AzSwiftDailyPRReport
-    Send-CrpCoreDailyPRReport
+    Send-MailMessage -From $from -To "team@microsoft.com" -Subject 'Team Weekly Report (Stage) - Please update before 11:00AM ET' -Body $body -BodyAsHtml -SmtpServer  "smtphost.redmond.corp.microsoft.com"
 }
